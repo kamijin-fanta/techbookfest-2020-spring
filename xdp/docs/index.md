@@ -11,8 +11,8 @@
 - チュートリアル
   - DROP, PASS + printk
   - ファイアウォール
-  - NAT
   - IPIP Tunnel
+  - NAT (bpf_ktime_get_ns)
 - go
   - github.com/newtools/ebpf
   - github.com/vishvananda/netlink
@@ -26,9 +26,12 @@
 
 ## refs
 
-- http://takeio.hatenablog.com/entry/2019/12/05/212945
-- http://yunazuno.hatenablog.com/entry/2016/10/11/090245
-- https://docs.cilium.io/en/v1.6/bpf/
-- 
+- blog
+  - takeio http://takeio.hatenablog.com/entry/2019/12/05/212945
+  - 
+  XDPを触ってみる http://yunazuno.hatenablog.com/entry/2016/10/11/090245
+- references
+  - Cilium BPF: https://docs.cilium.io/en/v1.6/bpf/
+  - BPF Helpers: https://github.com/iovisor/bpf-docs/blob/master/bpf_helpers.rst
 - 
 
