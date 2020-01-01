@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: (GPL-2.0 OR BSD-2-Clause)
 
-XDP_TARGETS := sample
+XDP_TARGETS := drop-all
 
 LLC ?= llc
 CLANG ?= clang
