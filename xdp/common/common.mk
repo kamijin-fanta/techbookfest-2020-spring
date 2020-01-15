@@ -25,6 +25,7 @@ COPY_LOADER ?=
 EXTRA_DEPS +=
 
 BPF_CFLAGS ?= -I$(LIBBPF_DIR)build/usr/include/ -I$(LIBBPF_DIR)include/ # -I../headers/
+BPF_CFLAGS += -I/usr/include/$(shell arch)-linux-gnu
 
 all: llvm-check $(USER_TARGETS) $(XDP_OBJ) $(COPY_LOADER) $(COPY_STATS)
 

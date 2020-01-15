@@ -35,7 +35,8 @@
 - references
   - Cilium BPF: https://docs.cilium.io/en/v1.6/bpf/
   - BPF Helpers: https://github.com/iovisor/bpf-docs/blob/master/bpf_helpers.rst
-- 
+- tutorial
+  - https://github.com/xdp-project/xdp-tutorial
 
 ## how to debug
 
@@ -62,3 +63,12 @@
 [882316.042285] **   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **
 [882316.042286] **********************************************************
 ```
+
+## 開発環境
+
+- editor
+  - VS Code
+  - https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools
+- さくらのクラウド
+  - マルチキューサポート
+  - https://cloud-news.sakura.ad.jp/2019/03/14/hostserver-irqbalance-enhanced/
