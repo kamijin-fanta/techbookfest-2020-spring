@@ -2,7 +2,7 @@
 #include <bpf/bpf_helpers.h>
 
 SEC("xdp")
-int xdp_prog_drop_all(struct xdp_md *ctx)
+int xdp_prog_dynamic_firewall(struct xdp_md *ctx)
 {
 	bpf_printk("drop packet\n");
 	return XDP_DROP;

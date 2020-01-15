@@ -10,9 +10,11 @@
 
 - チュートリアル
   - DROP, PASS + printk
-  - ファイアウォール
+  - ファイアウォール (static)
+  - ファイアウォール (Map利用)
   - IPIP Tunnel
-  - NAT (bpf_ktime_get_ns)
+  - IPIP Tunnel (Map利用)
+  - NAT (bpf_ktime_get_ns, map, checksum)
 - go
   - github.com/newtools/ebpf
   - github.com/vishvananda/netlink
@@ -35,3 +37,28 @@
   - BPF Helpers: https://github.com/iovisor/bpf-docs/blob/master/bpf_helpers.rst
 - 
 
+## how to debug
+
+- CLI
+  - `trace-cmd start -e 'xdp:*'`
+  - `trace-cmd show`
+  - `cat /sys/kernel/debug/tracing/trace_pipe`
+- GUI
+  - `trace-cmd record -e 'xdp:*' -O trace_printk`
+  - `kernelshark`
+
+```
+[882316.042280] **********************************************************
+[882316.042280] **   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **
+[882316.042281] **                                                      **
+[882316.042281] ** trace_printk() being used. Allocating extra memory.  **
+[882316.042282] **                                                      **
+[882316.042282] ** This means that this is a DEBUG kernel and it is     **
+[882316.042283] ** unsafe for production use.                           **
+[882316.042283] **                                                      **
+[882316.042284] ** If you see this message and you are not debugging    **
+[882316.042284] ** the kernel, report this immediately to your vendor!  **
+[882316.042285] **                                                      **
+[882316.042285] **   NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE NOTICE   **
+[882316.042286] **********************************************************
+```

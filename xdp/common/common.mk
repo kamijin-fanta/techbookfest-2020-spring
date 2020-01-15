@@ -70,3 +70,21 @@ $(XDP_OBJ): %.o: %.c  Makefile $(COMMON_MK) $(KERN_USER_H) $(EXTRA_DEPS) libbpf
 	    -Werror \
 	    -O2 -emit-llvm -c -g -o ${@:.o=.ll} $<
 	$(LLC) -march=bpf -filetype=obj -o $@ ${@:.o=.ll}
+
+
+GOCMD=go
+
+OUT_NAME := $(shell basename $(CURDIR))
+
+build-go: *.go
+	mkdir -p obj
+	$(GOCMD) build -o obj/$(OUT_NAME) .
+
+test-go: *.go xdp/*.o
+	mkdir -p obj
+	go test -c -o obj/$(OUT_NAME)_test .
+	sudo chown root obj/$(OUT_NAME)_test
+	sudo chmod +s obj/$(OUT_NAME)_test
+	go test -o obj/$(OUT_NAME)_test -count=1
+
+FORCE:
