@@ -25,6 +25,7 @@
   - jit
   - tailcall
   - ip link
+  - byte order (short,long, bpf_ntohs)
 
 
 ## refs

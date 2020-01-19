@@ -5,6 +5,8 @@ go 1.13
 require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/google/gopacket v1.1.17
+	github.com/k0kubun/pp v3.0.1+incompatible
+	github.com/mattn/go-colorable v0.1.4 // indirect
 	github.com/newtools/ebpf v0.1.0
 	github.com/stretchr/testify v1.4.0
 	github.com/vishvananda/netlink v1.0.0 // indirect

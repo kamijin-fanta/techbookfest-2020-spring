@@ -30,11 +30,11 @@ int xdp_prog_static_firewall(struct xdp_md *ctx)
 	struct tcphdr *tcp;
 	switch (ipv4->protocol) {
 		case IPPROTO_TCP:
-			tcp = data;
+			tcp = (void*)ipv4 + sizeof(*ipv4);
 			if (data_end < ((void*)tcp) + sizeof(*tcp)) {
 				return XDP_DROP;
 			}
-			if (tcp->dest == 80) {
+			if (tcp->dest == bpf_htons(80)) {
 				return XDP_PASS;
 			} else {
 				return XDP_DROP;
