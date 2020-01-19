@@ -5,6 +5,7 @@
 - XDP+GO言語で作る高速パケット処理
 - Linux Kernelの仕組みで、高速なNetwork Functionを自作できるようになる
 - テストを回しながら作る お手軽自作NAT/ファイアウォール/トンネリング
+- Go言語でテストを書きながら作る　高速パケット処理XDP
 
 ## 内容
 
@@ -72,3 +73,7 @@
 - さくらのクラウド
   - マルチキューサポート
   - https://cloud-news.sakura.ad.jp/2019/03/14/hostserver-irqbalance-enhanced/
+
+## 表紙
+
+- かわいい https://www.amazon.co.jp/dp/B07LGN6M86

@@ -4,6 +4,7 @@
 #include <linux/if_ether.h>
 #include <linux/ip.h>
 #include <linux/in.h>
+#include <linux/tcp.h>
 
 SEC("xdp")
 int xdp_prog_static_firewall(struct xdp_md *ctx)
@@ -26,9 +27,18 @@ int xdp_prog_static_firewall(struct xdp_md *ctx)
 		return XDP_DROP;
 	}
 
+	struct tcphdr *tcp;
 	switch (ipv4->protocol) {
 		case IPPROTO_TCP:
-			return XDP_PASS;
+			tcp = data;
+			if (data_end < ((void*)tcp) + sizeof(*tcp)) {
+				return XDP_DROP;
+			}
+			if (tcp->dest == 80) {
+				return XDP_PASS;
+			} else {
+				return XDP_DROP;
+			}
 		case IPPROTO_UDP:
 			return XDP_PASS;
 	}
