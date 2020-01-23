@@ -75,6 +75,10 @@
   - マルチキューサポート
   - https://cloud-news.sakura.ad.jp/2019/03/14/hostserver-irqbalance-enhanced/
 
+```
+sudo apt install linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04
+```
+
 ## 表紙
 
 - かわいい https://www.amazon.co.jp/dp/B07LGN6M86

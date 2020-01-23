@@ -5,12 +5,13 @@
 #include <linux/ip.h>
 #include <linux/in.h>
 #include <linux/tcp.h>
+#include <linux/udp.h>
 
 SEC("xdp")
 int xdp_prog_static_firewall(struct xdp_md *ctx)
 {
-	void *data_end = (void *)(long)ctx->data_end;
 	void *data = (void *)(long)ctx->data;
+	void *data_end = (void *)(long)ctx->data_end;
 	
 	struct ethhdr *eth = data;
 	if (data_end < ((void*)eth) + sizeof(*eth)) {
@@ -28,6 +29,7 @@ int xdp_prog_static_firewall(struct xdp_md *ctx)
 	}
 
 	struct tcphdr *tcp;
+	struct udphdr *udp;
 	switch (ipv4->protocol) {
 		case IPPROTO_TCP:
 			tcp = (void*)ipv4 + sizeof(*ipv4);
@@ -40,7 +42,15 @@ int xdp_prog_static_firewall(struct xdp_md *ctx)
 				return XDP_DROP;
 			}
 		case IPPROTO_UDP:
-			return XDP_PASS;
+			udp = (void*)ipv4 + sizeof(*ipv4);
+			if (data_end < ((void*)udp) + sizeof(*udp)) {
+				return XDP_DROP;
+			}
+			if (udp->dest == bpf_htons(53)) {
+				return XDP_PASS;
+			} else {
+				return XDP_DROP;
+			}
 	}
 
 	bpf_printk("drop packet\n");
