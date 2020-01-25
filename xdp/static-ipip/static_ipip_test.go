@@ -1,25 +1,18 @@
 package main
 
 import (
+	"github.com/bradleyjkemp/cupaloy"
 	"github.com/stretchr/testify/assert"
 	"github.com/google/gopacket/layers"
 	"github.com/google/gopacket"
+	"github.com/kamijin-fanta/techbookfest-2020-spring/xdp/pkg/xdp"
 	"net"
 	"github.com/newtools/ebpf"
 	"testing"
 )
 
-
-const (
-	XDP_ABORTED = uint32(iota)
-	XDP_DROP
-	XDP_PASS
-	XDP_TX
-	XDP_REDIRECT
-)
-
 func TestHttpTrafic(t *testing.T) {
-	spec, err := ebpf.LoadCollectionSpec("./xdp/static-firewall.o")
+	spec, err := ebpf.LoadCollectionSpec("./xdp/static-ipip.o")
 	if err != nil {
 		panic(err)
 	}
@@ -30,7 +23,7 @@ func TestHttpTrafic(t *testing.T) {
 	}
 	defer coll.Close()
 
-	xdpFwdProg := coll.Programs["xdp_prog_static_firewall"]
+	xdpFwdProg := coll.Programs["xdp_prog_static_ipip_decap"]
 
 
 	dstMac, _ := net.ParseMAC("11:22:33:44:55:aa")
@@ -45,18 +38,14 @@ func TestHttpTrafic(t *testing.T) {
 		&layers.Ethernet{
 			DstMAC:       dstMac,
 			SrcMAC:       srcMac,
-			EthernetType: layers.EthernetTypeDot1Q,
-		},
-		&layers.Dot1Q{
-			VLANIdentifier: 11,
-			Type:           layers.EthernetTypeIPv4,
+			EthernetType: layers.EthernetTypeIPv4,
 		},
 		&layers.IPv4{
 			Version:  4,
 			Protocol: layers.IPProtocolICMPv4,
 			Flags:    layers.IPv4DontFragment,
-			SrcIP:    net.IP{192, 168, 100, 10},
-			DstIP:    net.IP{1, 1, 1, 1},
+			SrcIP:    net.IP{192, 168, 201, 1},
+			DstIP:    net.IP{192, 168, 202, 2},
 			TTL:      64,
 			IHL:      5,
 			Id:       1160,
@@ -69,9 +58,14 @@ func TestHttpTrafic(t *testing.T) {
 	)
 
 	inputPacket := buf.Bytes()
-	ret, _, err := xdpFwdProg.Test(inputPacket)
+	ret, res, err := xdpFwdProg.Test(inputPacket)
 	if err != nil {
 		panic(err)
 	}
-	assert.Equal(t, XDP_DROP, ret)
+	assert.Equal(t, xdp.XDP_PASS.String(), xdp.XdpAction(ret).String())
+
+	parsed := gopacket.NewPacket(res, layers.LayerTypeEthernet, gopacket.Default)
+	cupaloy.SnapshotT(t, parsed.Layers()) // if update snapshot: UPDATE_SNAPSHOTS=true
+
+	t.Log("has problem? you need 'echo 1 >/proc/sys/net/ipv4/ip_forward'")
 }

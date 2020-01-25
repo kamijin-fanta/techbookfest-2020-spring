@@ -81,11 +81,12 @@ build-go: *.go
 	mkdir -p obj
 	$(GOCMD) build -o obj/$(OUT_NAME) .
 
+GO_TEST_ARG = ""
 test-go: *.go xdp/*.o
 	mkdir -p obj
 	go test -c -o obj/$(OUT_NAME)_test .
 	sudo chown root obj/$(OUT_NAME)_test
 	sudo chmod +s obj/$(OUT_NAME)_test
-	go test -o obj/$(OUT_NAME)_test -count=1
+	go test -o obj/$(OUT_NAME)_test -count=1 $(GO_TEST_ARG)
 
 FORCE:

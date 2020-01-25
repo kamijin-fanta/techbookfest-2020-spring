@@ -77,6 +77,15 @@
 
 ```
 sudo apt install linux-generic-hwe-18.04 linux-headers-generic-hwe-18.04
+sudo apt install ethtool
+```
+
+## commands
+
+### ip link set dev DEVICE xdp obj OBJECTNAME.o sec SECTION
+
+```
+ip link set dev veth_pod0_in xdp obj ./xdp/static-ipip.o sec xdp
 ```
 
 ## 表紙
