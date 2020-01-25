@@ -1,0 +1,55 @@
+([]gopacket.Layer) (len=3) {
+  (*layers.Ethernet)({
+    BaseLayer: (layers.BaseLayer) {
+      Contents: ([]uint8) (len=14) {
+        00000000  26 fc cf f7 6d 6d 3e b4  bb c1 4d e8 08 00        |&...mm>...M...|
+      },
+      Payload: ([]uint8) (len=28) {
+        00000000  45 00 00 00 04 88 40 00  40 01 22 1f c0 a8 c9 02  |E.....@.@.".....|
+        00000010  c0 a8 ca 02 08 00 f7 fd  00 01 00 01              |............|
+      }
+    },
+    SrcMAC: (net.HardwareAddr) (len=6) 3e:b4:bb:c1:4d:e8,
+    DstMAC: (net.HardwareAddr) (len=6) 26:fc:cf:f7:6d:6d,
+    EthernetType: (layers.EthernetType) IPv4,
+    Length: (uint16) 0
+  }),
+  (*layers.IPv4)({
+    BaseLayer: (layers.BaseLayer) {
+      Contents: ([]uint8) (len=20) {
+        00000000  45 00 00 00 04 88 40 00  40 01 22 1f c0 a8 c9 02  |E.....@.@.".....|
+        00000010  c0 a8 ca 02                                       |....|
+      },
+      Payload: ([]uint8) (len=8) {
+        00000000  08 00 f7 fd 00 01 00 01                           |........|
+      }
+    },
+    Version: (uint8) 4,
+    IHL: (uint8) 5,
+    TOS: (uint8) 0,
+    Length: (uint16) 28,
+    Id: (uint16) 1160,
+    Flags: (layers.IPv4Flag) DF,
+    FragOffset: (uint16) 0,
+    TTL: (uint8) 64,
+    Protocol: (layers.IPProtocol) ICMPv4,
+    Checksum: (uint16) 8735,
+    SrcIP: (net.IP) (len=4) 192.168.201.2,
+    DstIP: (net.IP) (len=4) 192.168.202.2,
+    Options: ([]layers.IPv4Option) <nil>,
+    Padding: ([]uint8) <nil>
+  }),
+  (*layers.ICMPv4)({
+    BaseLayer: (layers.BaseLayer) {
+      Contents: ([]uint8) (len=8) {
+        00000000  08 00 f7 fd 00 01 00 01                           |........|
+      },
+      Payload: ([]uint8) {
+      }
+    },
+    TypeCode: (layers.ICMPv4TypeCode) EchoRequest,
+    Checksum: (uint16) 63485,
+    Id: (uint16) 1,
+    Seq: (uint16) 1
+  })
+}

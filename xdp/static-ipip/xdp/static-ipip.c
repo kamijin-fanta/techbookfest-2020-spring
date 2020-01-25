@@ -43,8 +43,8 @@ const __be32 tunnel_src_ip =   0xC0A8C901; // 192.168.201.1
 // const __be32 tunnel_dst_ip =   0xAC180106; // 172.24.1.6
 const __be32 tunnel_dst_ip =   0xC0A8CA02; // 192.168.202.2
 
-SEC("xdp")
-int xdp_prog_static_ipip_decap(struct xdp_md *ctx)
+SEC("xdp_encap")
+int xdp_prog_static_ipip_encap(struct xdp_md *ctx)
 {
 	void *data = (void *)(long)ctx->data;
 	void *data_end = (void *)(long)ctx->data_end;
@@ -65,7 +65,7 @@ int xdp_prog_static_ipip_decap(struct xdp_md *ctx)
 	}
 
 	// 宛先IPアドレスが範囲内か確認
-	__be32 daddr = bpf_htonl(ipv4->daddr);
+	__u32 daddr = bpf_htonl(ipv4->daddr);
 	if (daddr < target_start_ip || target_end_ip < daddr) {
 		return XDP_PASS;
 	}
@@ -116,14 +116,85 @@ int xdp_prog_static_ipip_decap(struct xdp_md *ctx)
 
 	int rc = bpf_fib_lookup(ctx, &fib_params, sizeof(fib_params), BPF_FIB_LOOKUP_DIRECT);
 	if (rc != BPF_FIB_LKUP_RET_SUCCESS) {
-		bpf_printk("fib_lookup failed %d %d\n", rc, ctx->ingress_ifindex);
+		bpf_printk("encap: fib_lookup failed %d %d\n", rc, ctx->ingress_ifindex);
 		return XDP_DROP;
 	}
 
 	memcpy(eth->h_source, fib_params.smac, ETH_ALEN);
 	memcpy(eth->h_dest, fib_params.dmac, ETH_ALEN);
 
-	bpf_printk("tunnel packet %d -> %d\n", ctx->ingress_ifindex, fib_params.ifindex);
+	bpf_printk("encap: tunnel packet %d -> %d\n", ctx->ingress_ifindex, fib_params.ifindex);
+	return XDP_PASS;
+}
+
+
+SEC("xdp_decap")
+int xdp_prog_static_ipip_decap(struct xdp_md *ctx)
+{
+	void *data = (void *)(long)ctx->data;
+	void *data_end = (void *)(long)ctx->data_end;
+	
+	struct ethhdr *eth = data;
+	if (data_end < ((void*)eth) + sizeof(*eth)) {
+		return XDP_PASS;
+	}
+
+	__be16 h_proto = eth->h_proto;
+	if (h_proto != bpf_htons(ETH_P_IP)) {
+		return XDP_PASS; // support only ipv4
+	}
+
+	struct iphdr *ipv4 = data + sizeof(*eth);
+	if (data_end < ((void*)ipv4) + sizeof(*ipv4)) {
+		return XDP_PASS;
+	}
+
+	// 送信元IPアドレス・プロトコルを確認
+	__u32 saddr = bpf_ntohl(ipv4->saddr);
+	if (saddr != tunnel_src_ip || ipv4->protocol != IPPROTO_IPIP) {
+		return XDP_PASS;
+	}
+
+  // IPIPヘッダの削除
+	int ipip_header_size = sizeof(struct iphdr);
+	if(bpf_xdp_adjust_head(ctx, ipip_header_size)){
+			return XDP_DROP;
+	}
+
+  // 各アドレスの再設定
+	data = (void *)(long)ctx->data;
+	data_end = (void *)(long)ctx->data_end;
+	eth = data;
+	ipv4 = data + sizeof(*eth);
+
+	if (data_end < (void*)ipv4 + sizeof(*ipv4)) {
+		return XDP_DROP;
+	}
+
+	eth->h_proto = bpf_htons(ETH_P_IP);
+
+	struct bpf_fib_lookup fib_params = {};
+	__builtin_memset(&fib_params, 0, sizeof(fib_params));
+	fib_params.family = AF_INET;
+	fib_params.tos = ipv4->tos;
+	fib_params.l4_protocol = ipv4->protocol;
+	fib_params.sport = 0;
+	fib_params.dport = 0;
+	fib_params.tot_len = bpf_ntohs(ipv4->tot_len);
+	fib_params.ipv4_src = ipv4->saddr;  // network byte order
+	fib_params.ipv4_dst = ipv4->daddr;
+	fib_params.ifindex = ctx->ingress_ifindex;
+
+	int rc = bpf_fib_lookup(ctx, &fib_params, sizeof(fib_params), BPF_FIB_LOOKUP_DIRECT);
+	if (rc != BPF_FIB_LKUP_RET_SUCCESS) {
+		bpf_printk("decap: fib_lookup failed %d %d\n", rc, ctx->ingress_ifindex);
+		return XDP_DROP;
+	}
+
+	memcpy(eth->h_source, fib_params.smac, ETH_ALEN);
+	memcpy(eth->h_dest, fib_params.dmac, ETH_ALEN);
+
+	bpf_printk("decap: tunnel packet %d -> %d\n", ctx->ingress_ifindex, fib_params.ifindex);
 	return XDP_PASS;
 }
 
