@@ -19,7 +19,7 @@ const (
 )
 
 func TestHttpTrafic(t *testing.T) {
-	spec, err := ebpf.LoadCollectionSpec("./xdp/static-firewall.o")
+	spec, err := ebpf.LoadCollectionSpec("./xdp/xdp_prog_nat.o")
 	if err != nil {
 		panic(err)
 	}

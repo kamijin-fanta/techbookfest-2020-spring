@@ -20,28 +20,28 @@
 
 static __always_inline void csum_update(struct iphdr *iph)
 {
-    __u16 *next_iph_u16;
-    __u32 csum = 0;
-    int i;
-    iph->check = 0;
-    next_iph_u16 = (__u16 *)iph;
+	__u16 *next_iph_u16;
+	__u32 csum = 0;
+	int i;
+	iph->check = 0;
+	next_iph_u16 = (__u16 *)iph;
 #pragma clang loop unroll(full)
-    for (i = 0; i<sizeof(*iph)>> 1; i++)
-        csum += *next_iph_u16++;
+	for (i = 0; i<sizeof(*iph)>> 1; i++)
+		csum += *next_iph_u16++;
 
-    iph->check = ~((csum & 0xffff) + (csum >> 16));
+	iph->check = ~((csum & 0xffff) + (csum >> 16));
 }
 
 #define IP_DF		0x4000		/* Flag: "Don't Fragment"	*/
 
-// const __be32 target_start_ip = 0x0A000000; // 10.0.0.0
-// const __be32 target_end_ip =   0x0AFFFFFF; // 10.255.255.255
-const __be32 target_start_ip = 0xC0A80000; // 192.168.0.0
-const __be32 target_end_ip =   0xC0A8FFFF; // 192.168.255.255
-// const __be32 tunnel_src_ip =   0xAC180105; // 172.24.1.5
-const __be32 tunnel_src_ip =   0xC0A8C901; // 192.168.201.1
-// const __be32 tunnel_dst_ip =   0xAC180106; // 172.24.1.6
-const __be32 tunnel_dst_ip =   0xC0A8CA02; // 192.168.202.2
+// const __u32 target_start_ip = 0x0A000000; // 10.0.0.0
+// const __u32 target_end_ip =   0x0AFFFFFF; // 10.255.255.255
+const __u32 target_start_ip = 0xC0A80000; // 192.168.0.0
+const __u32 target_end_ip =   0xC0A8FFFF; // 192.168.255.255
+// const __u32 tunnel_src_ip =   0xAC180105; // 172.24.1.5
+const __u32 tunnel_src_ip =   0xC0A8C901; // 192.168.201.1
+// const __u32 tunnel_dst_ip =   0xAC180106; // 172.24.1.6
+const __u32 tunnel_dst_ip =   0xC0A8CA02; // 192.168.202.2
 
 SEC("xdp_encap")
 int xdp_prog_static_ipip_encap(struct xdp_md *ctx)
@@ -54,7 +54,7 @@ int xdp_prog_static_ipip_encap(struct xdp_md *ctx)
 		return XDP_PASS;
 	}
 
-	__be16 h_proto = eth->h_proto;
+	__u16 h_proto = eth->h_proto;
 	if (h_proto != bpf_htons(ETH_P_IP)) {
 		return XDP_PASS; // support only ipv4
 	}
@@ -139,7 +139,7 @@ int xdp_prog_static_ipip_decap(struct xdp_md *ctx)
 		return XDP_PASS;
 	}
 
-	__be16 h_proto = eth->h_proto;
+	__u16 h_proto = eth->h_proto;
 	if (h_proto != bpf_htons(ETH_P_IP)) {
 		return XDP_PASS; // support only ipv4
 	}
